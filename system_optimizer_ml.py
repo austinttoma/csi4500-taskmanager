@@ -40,11 +40,18 @@ def get_gpu_usage():
     except Exception:
         return 0.0  # No GPU detected or error
 
+# Load the label encoder for decoding predictions
+LABEL_ENCODER_PATH = "label_encoder.pkl"
+if os.path.exists(LABEL_ENCODER_PATH):
+    label_encoder = joblib.load(LABEL_ENCODER_PATH)
+else:
+    label_encoder = None
+
 def optimize_system():
     """Optimize system performance using ML predictions."""
-    global model
-    if model is None:
-        return "No ML model found. Train and save a model first."
+    global model, label_encoder
+    if model is None or label_encoder is None:
+        return "No ML model or label encoder found. Train and save both first."
     
     metrics = np.array([
         [
@@ -54,8 +61,12 @@ def optimize_system():
             get_gpu_usage()
         ]
     ])
-    action = model.predict(metrics)[0]  # Predict the best optimization action
     
+    # Predict numerical action and decode it
+    predicted_action_numeric = model.predict(metrics)[0]
+    action = label_encoder.inverse_transform([predicted_action_numeric])[0]
+
+    # Perform system optimization based on decoded action
     if action == "lower_cpu_priority":
         subprocess.run(["renice", "+10", "-p", str(os.getpid())])
         return "Lowered CPU priority."
