@@ -66,7 +66,7 @@ def save_training_data(usage_data, priority_data):
         for proc_name, runtime in usage_data.items():
             priority = priority_data.get(proc_name, 0)
             writer.writerow([proc_name, round(runtime, 1), priority])
-    print(f"✅ Training data saved to {CSV_FILE}")
+    print(f"Training data saved to {CSV_FILE}")
 
 def main():
     # Track processes for 60 seconds, sampling every 5 seconds
