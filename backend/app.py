@@ -7,7 +7,7 @@ import joblib
 import numpy as np
 from PyQt5.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QTableWidget, QTableWidgetItem, QComboBox
+    QTableWidget, QTableWidgetItem, QComboBox, QLineEdit,
 )
 from PyQt5.QtCore import QThread, pyqtSignal, QTimer
 
@@ -93,6 +93,12 @@ class SystemOptimizerApp(QWidget):
         self.status_label = QLabel("System Status: Monitoring...", self)
         top_layout.addWidget(self.status_label)
 
+        # Search bar
+        self.search_bar = QLineEdit(self)
+        self.search_bar.setPlaceholderText("Search process name...")
+        self.search_bar.textChanged.connect(self.update_process_table)
+        top_layout.addWidget(self.search_bar)
+
         # Add sort dropdown (combo box)
         self.sort_combo = QComboBox(self)
         self.sort_combo.addItems([
@@ -139,6 +145,7 @@ class SystemOptimizerApp(QWidget):
         """Update the table widget with the sorted process list based on the selected sort option."""
         processes = get_process_list()
         sort_option = self.sort_combo.currentText()
+        search_text = self.search_bar.text().lower()
 
         if sort_option == "Priority: Low to High":
             processes.sort(key=lambda x: x["priority"])
@@ -148,6 +155,10 @@ class SystemOptimizerApp(QWidget):
             processes.sort(key=lambda x: x["name"].lower())
         elif sort_option == "Process Name: Z-A":
             processes.sort(key=lambda x: x["name"].lower(), reverse=True)
+
+        # Apply filtering based on search
+        if search_text:
+            processes = [p for p in processes if search_text in p["name"].lower()]
 
         self.table.setRowCount(len(processes))
         for row, p in enumerate(processes):
