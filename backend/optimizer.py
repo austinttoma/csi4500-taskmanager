@@ -6,15 +6,16 @@ import platform
 # Auto-adjust UID threshold based on OS
 if platform.system() == "Darwin":  # macOS
     USER_UID_THRESHOLD = 500
-else:  # Linux or other
+else:  # Linux or other (including Windows)
     USER_UID_THRESHOLD = 1000
 
 IDLE_CPU_THRESHOLD = 1.0  # % CPU to be considered idle
 IDLE_TIME_THRESHOLD = 60  # seconds of runtime
-MEMORY_USAGE_THRESHOLD_MB = 20  # skip killing if using more than 20MB
-DRY_RUN = True  # Toggle to True to log instead of killing
+MEMORY_USAGE_THRESHOLD_MB = 20  # skip terminating if using more than 20MB
+# For safety, DRY_RUN remains True by default; change to False to actually terminate processes.
+DRY_RUN = True
 
-# Expanded whitelist substrings (case-insensitive match)
+# Whitelist substrings for process names (case-insensitive)
 WHITELIST = [
     'python', 'code', 'terminal', 'qt', 'obsidian', 'spotify', 'discord', 'safari',
     'webkit', 'mdworker', 'helper', 'plugin-container', 'finder', 'dock', 'systemuiserver',
@@ -23,12 +24,17 @@ WHITELIST = [
 ]
 
 def is_idle(proc, now):
+    """Determine if a process is idle based on CPU, memory, runtime and whitelist criteria."""
     try:
         cpu = proc.cpu_percent(interval=None)
         create_time = proc.create_time()
-        uid = proc.uids().real if hasattr(proc, "uids") else os.getuid()
+        # Use proc.uids() if available, else default to 1000 (suitable for Windows)
+        if hasattr(proc, "uids"):
+            uid = proc.uids().real
+        else:
+            uid = 1000
         name = proc.name().lower()
-        mem = proc.memory_info().rss / (1024 * 1024)  # MB
+        mem = proc.memory_info().rss / (1024 * 1024)  # in MB
 
         if uid < USER_UID_THRESHOLD:
             print(f"SKIP {name} (PID {proc.pid}): system UID {uid}")
@@ -51,7 +57,9 @@ def is_idle(proc, now):
 
 def clean_memory():
     """
-    Scans and logs (or terminates) idle user processes to free up RAM.
+    Scan and log (or terminate) idle user processes to free up RAM.
+    
+    In DRY_RUN mode, this will only log the processes that would be terminated.
     """
     now = time.time()
     affected = []
@@ -59,7 +67,8 @@ def clean_memory():
         try:
             print(f"Checking: {proc.pid} {proc.name()}")
         except Exception:
-            pass
+            continue
+
         if is_idle(proc, now):
             try:
                 name = proc.name()

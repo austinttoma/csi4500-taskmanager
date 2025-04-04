@@ -18,7 +18,7 @@ def collect_usage(duration=60, interval=5):
         for proc in psutil.process_iter(['name', 'create_time']):
             try:
                 name = proc.info['name']
-                # Calculate how long the process has been running
+                # Calculate runtime in seconds
                 runtime = now - proc.info['create_time']
                 usage[name] = runtime
             except (psutil.NoSuchProcess, psutil.AccessDenied):
@@ -28,37 +28,30 @@ def collect_usage(duration=60, interval=5):
 
 def assign_priority_numeric(usage_data):
     """
-    Assigns a numeric priority based on the runtime percentiles.
-    Higher runtime means a higher priority (i.e., a process you want to keep).
-    For instance, processes in the top 10% (90th-100th percentile) get 10,
-    those in the next decile get 9, and so on.
-    Returns a dictionary mapping process name to a priority number (1-10).
+    Assigns a numeric priority (1-10) based on process runtime percentiles.
+    Processes with longer runtimes get higher priority.
     """
     runtimes = np.array(list(usage_data.values()))
     if len(runtimes) == 0:
         return {}
     
-    # Compute decile thresholds: 10%, 20%, ..., 90%
+    # Calculate decile thresholds: 10%, 20%, ..., 90%
     thresholds = [np.percentile(runtimes, p) for p in range(10, 100, 10)]
     
     priority_dict = {}
     for proc, runtime in usage_data.items():
-        # Default lowest priority if below the lowest threshold
-        priority = 1  
-        # Check which decile the runtime falls into
+        priority = 1  # default lowest priority
         for i, thresh in enumerate(thresholds):
             if runtime >= thresh:
-                priority = i + 2  # i starts at 0, so add 2
-        # Cap priority at 10
-        if priority > 10:
-            priority = 10
+                priority = i + 2  # i starts at 0 so add 2
+        priority = min(priority, 10)
         priority_dict[proc] = priority
     return priority_dict
 
 def save_training_data(usage_data, priority_data):
     """
-    Writes the collected usage data to a CSV file with columns:
-    process_name, runtime_seconds, and numeric_priority.
+    Writes the collected usage data to a CSV file.
+    The CSV has columns: process_name, runtime_seconds, numeric_priority.
     """
     with open(CSV_FILE, "w", newline="") as f:
         writer = csv.writer(f)
@@ -69,7 +62,7 @@ def save_training_data(usage_data, priority_data):
     print(f"Training data saved to {CSV_FILE}")
 
 def main():
-    # Track processes for 60 seconds, sampling every 5 seconds
+    # Track processes for 60 seconds, sampling every 5 seconds.
     duration = 60
     interval = 5
     usage_data = collect_usage(duration=duration, interval=interval)
@@ -78,4 +71,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
