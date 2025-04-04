@@ -9,11 +9,7 @@ import numpy as np
 from functools import partial
 from PyQt5.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-<<<<<<< HEAD
     QTableWidget, QTableWidgetItem, QComboBox, QMessageBox, QLineEdit
-=======
-    QTableWidget, QTableWidgetItem, QComboBox, QLineEdit,
->>>>>>> 9a2ab422f0ad9c438625bb487090e59475a96e0d
 )
 from PyQt5.QtCore import QThread, pyqtSignal, QTimer
 
@@ -186,7 +182,6 @@ class SystemOptimizerApp(QWidget):
 
     def update_process_table(self):
         processes = get_process_list()
-<<<<<<< HEAD
         search_term = self.search_bar.text().lower().strip()
         if search_term:
             # Calculate a similarity score for each process based on the search term
@@ -204,23 +199,6 @@ class SystemOptimizerApp(QWidget):
                 processes.sort(key=lambda x: x["name"].lower())
             elif sort_option == "Process Name: Z-A":
                 processes.sort(key=lambda x: x["name"].lower(), reverse=True)
-=======
-        sort_option = self.sort_combo.currentText()
-        search_text = self.search_bar.text().lower()
-
-        if sort_option == "Priority: Low to High":
-            processes.sort(key=lambda x: x["priority"])
-        elif sort_option == "Priority: High to Low":
-            processes.sort(key=lambda x: x["priority"], reverse=True)
-        elif sort_option == "Process Name: A-Z":
-            processes.sort(key=lambda x: x["name"].lower())
-        elif sort_option == "Process Name: Z-A":
-            processes.sort(key=lambda x: x["name"].lower(), reverse=True)
->>>>>>> 9a2ab422f0ad9c438625bb487090e59475a96e0d
-
-        # Apply filtering based on search
-        if search_text:
-            processes = [p for p in processes if search_text in p["name"].lower()]
 
         self.table.setRowCount(len(processes))
         for row, group in enumerate(processes):
@@ -389,4 +367,3 @@ if __name__ == "__main__":
     window = SystemOptimizerApp()
     window.show()
     sys.exit(app.exec_())
-
