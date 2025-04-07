@@ -9,9 +9,10 @@ import numpy as np
 from functools import partial
 from PyQt5.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
-    QTableWidget, QTableWidgetItem, QComboBox, QMessageBox, QLineEdit
+    QTableWidget, QTableWidgetItem, QComboBox, QMessageBox, QLineEdit, QHeaderView
 )
 from PyQt5.QtCore import QThread, pyqtSignal, QTimer
+from PyQt5.QtGui import QIcon
 
 # Load pre-trained ML model
 MODEL_PATH = "ml_model.pkl"
@@ -108,10 +109,43 @@ class SystemOptimizerApp(QWidget):
         self.refresh_timer = QTimer(self)
         self.refresh_timer.timeout.connect(self.update_process_table)
         self.refresh_timer.start(10000)
+    
+    # Setting a dark mode 
+        dark_stylesheet = """
+        QWidget {
+                background-color: #121212;
+                color: #ffffff;
+        }       
+
+        QTableWidget {
+                background-color: #1e1e1e;
+                gridline-color: #444;
+                color: #ffffff;
+        }
+
+        QHeaderView::section {
+                background-color: #2c2c2c;
+                color: #ffffff;
+                padding: 4px;
+                border: 1px solid #444;
+        }
+
+        QTableWidget QTableCornerButton::section {
+                background-color: #2c2c2c;
+        }
+
+        QScrollBar:vertical, QScrollBar:horizontal {
+                background: #2c2c2c;
+                border: none;
+        }
+        """
+        self.setStyleSheet(dark_stylesheet)
+        self.setWindowIcon(QIcon("icon.png"))
 
     def initUI(self):
         self.setWindowTitle("System Optimizer")
         self.setGeometry(100, 100, 900, 600)
+        
 
         main_layout = QVBoxLayout()
 
@@ -139,6 +173,7 @@ class SystemOptimizerApp(QWidget):
         top_layout.addWidget(self.sort_combo)
 
         main_layout.addLayout(top_layout)
+        
 
         # Buttons panel
         btn_layout = QHBoxLayout()
@@ -163,11 +198,15 @@ class SystemOptimizerApp(QWidget):
         # Table to display aggregated process data:
         # Columns: Count, Process Name, Avg Runtime (sec), Priority, CPU (%), Memory (MB), Action
         self.table = QTableWidget(self)
+        self.table.setSortingEnabled(True)
         self.table.setColumnCount(7)
         self.table.setHorizontalHeaderLabels([
             "Count", "Process Name", "Avg Runtime (sec)", "Priority",
             "CPU (%)", "Memory (MB)", "Action"
         ])
+        header = self.table.horizontalHeader()
+        header.setSectionResizeMode(QHeaderView.Stretch)
+
         main_layout.addWidget(self.table)
 
         self.setLayout(main_layout)
