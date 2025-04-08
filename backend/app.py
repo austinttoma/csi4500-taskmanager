@@ -220,28 +220,30 @@ class SystemOptimizerApp(QWidget):
         )
 
     def update_process_table(self):
+        """Update the table widget with the sorted process list based on the selected sort option."""
         processes = get_process_list()
-        search_term = self.search_bar.text().lower().strip()
-        if search_term:
-            # Calculate a similarity score for each process based on the search term
-            for p in processes:
-                p["similarity"] = difflib.SequenceMatcher(None, search_term, p["name"].lower()).ratio()
-            # Sort processes so that those with higher similarity come first
-            processes.sort(key=lambda x: x["similarity"], reverse=True)
-        else:
-            sort_option = self.sort_combo.currentText()
-            if sort_option == "Priority: Low to High":
-                processes.sort(key=lambda x: x["priority"])
-            elif sort_option == "Priority: High to Low":
-                processes.sort(key=lambda x: x["priority"], reverse=True)
-            elif sort_option == "Process Name: A-Z":
-                processes.sort(key=lambda x: x["name"].lower())
-            elif sort_option == "Process Name: Z-A":
-                processes.sort(key=lambda x: x["name"].lower(), reverse=True)
+        sort_option = self.sort_combo.currentText()
+        search_text = self.search_bar.text().lower()
+
+        # Apply sorting
+        if sort_option == "Priority: Low to High":
+            processes.sort(key=lambda x: x["priority"])
+        elif sort_option == "Priority: High to Low":
+            processes.sort(key=lambda x: x["priority"], reverse=True)
+        elif sort_option == "Process Name: A-Z":
+            processes.sort(key=lambda x: x["name"].lower())
+        elif sort_option == "Process Name: Z-A":
+            processes.sort(key=lambda x: x["name"].lower(), reverse=True)
+
+        # Apply filtering based on search text
+        if search_text:
+            processes = [p for p in processes if search_text in p["name"].lower()]
 
         self.table.setRowCount(len(processes))
         for row, group in enumerate(processes):
             self.create_process_row(row, group)
+
+
 
     def create_process_row(self, row, group):
         """Helper to create a table row for an aggregated process group."""
