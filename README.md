@@ -1,32 +1,50 @@
 # CSI 4500 Task Manager Optimizer
-_______________________________
+![alt text](image.png)
 
-## Backend
-To install all requirements for python, first initiate a venv then install python requirements in terminal. NOTE: In some linux distributions you will use python / pip instead of python3 / pip3
-```py
-# intializes venv and activates it
+This project is a task manager that leverages machine learning to recommend programs for closure, optimizing hardware usage.
+
+
+&nbsp;
+# How It's Made
+Tech used: Python, PyQt, XGBoost
+
+For this project, we used Python for the backend, PyQt for the front end, and XGBoost for the machine learning model. Python was used for the backend because python is widely used and supported for machine learning. We decided to use the Python PyQt library for the front end for easy low overhead communication with the backend, which is crucial for an optimizer. We chose XGBoost for out machine learning model because it is an open-source high efficiency and accuracy model that fits well with our project. 
+
+To run the model we have two python files, collect_training_data.py to collect the data into the CSV file, and train_model.py which takes that file and trains the XGBoost model.
+
+&nbsp;
+## Requirements
+To install all requirements for python, first initiate a venv then install python requirements in terminal. 
+
+NOTE: In some linux distributions you will use python / pip instead of python3 / pip3
+
+### intializes venv and activates it
+```
 python3 -m venv venv
-source venv/bin/activate 
 
-# downlaods all requirements.txt files
-pip3 install -r REQUIREMENTS.txt
+source venv/bin/activate 
 ```
 
-Before trying to run the application, please go to your terminal and install the packages located in REQUIREMENTS.txt.
+### Download all dependencies
+Before trying to run the application, go to your terminal and make sure your in the project directory and install all dependencies from requirements.txt.
+```
+pip3 install -r requirements.txt 
+```
 
-Enter your terminal:
 
-Navigate to the project directory: 
+&nbsp;
+# Running the Program
+1. Enter your terminal:
 
-python collect_training_data.py
+2. Navigate to the project directory: 
 
-python train_model.py
+3. Run ```python collect_training_data.py```
 
-Check that ml_model.pkl (and possibly label_encoder.pkl if applicable) exists in your backend folder.
+4. simultaneously Run ```python train_model.py```
 
-Then launch the app: 
+5. Check that ml_model.pkl (and possibly label_encoder.pkl if applicable) exists in your backend folder.
 
-python app.py
+6. Laslty launch the front end: ```python app.py```
 
 
 
