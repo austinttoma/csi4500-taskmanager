@@ -18,7 +18,7 @@ To install all requirements for python, first initiate a venv then install pytho
 
 NOTE: In some linux distributions you will use python / pip instead of python3 / pip3
 
-### intializes venv and activates it
+### Intializes venv and activates it
 ```
 python3 -m venv venv
 
